@@ -20,14 +20,15 @@ const TicketDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const ticketId = id ? Number(id) : null;
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, setError, setLoading } = useAuth();
   const { upsertTicket } = useTickets();
 
   const [ticket, setTicket] = useState<Ticket | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [statuses, setStatuses] = useState<Status[]>([]);
   const [agents, setAgents] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
+
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   const { register, handleSubmit, reset, formState: { isSubmitting } } = useForm<CommentForm>();
 
@@ -35,6 +36,7 @@ const TicketDetails = () => {
     if (!ticketId) return;
     const fetchData = async () => {
       try {
+        setIsInitialLoading(true);
         const [t, c, s] = await Promise.all([
           getTicketById(ticketId),
           getComments(ticketId),
@@ -53,9 +55,10 @@ const TicketDetails = () => {
           }
         }
       } catch (err) {
-        console.error("Critical error loading ticket details:", err);
+        setError(err);
+      } finally {
+        setIsInitialLoading(false);
       }
-      finally { setLoading(false); }
     };
     fetchData();
   }, [ticketId, currentUser?.role]);
@@ -66,10 +69,13 @@ const TicketDetails = () => {
       const newComment = await addComment(ticketId, data.content);
       setComments(prev => [...prev, newComment]);
       reset();
-    } catch (err) { alert("שגיאה בשליחה"); }
+    } catch (err) { setError(err); }
+    finally {
+      setLoading(false);
+    }
   };
 
-  if (loading) return <S.PageWrapper><Container maxWidth="lg"><Skeleton variant="rectangular" height="80vh" sx={{ borderRadius: '24px' }} /></Container></S.PageWrapper>;
+  if (isInitialLoading) return <S.PageWrapper><Container maxWidth="lg"><Skeleton variant="rectangular" height="80vh" sx={{ borderRadius: '24px' }} /></Container></S.PageWrapper>;
   if (!ticket) return <S.PageWrapper><Typography>הפנייה לא נמצאה</Typography></S.PageWrapper>;
 
   return (
@@ -141,7 +147,6 @@ const TicketDetails = () => {
             </Box>
           </S.MainContent>
 
-          {/* עמודת צד (Sidebar) */}
           <S.SidebarCard elevation={0}>
             <Stack spacing={4}>
               <Box>

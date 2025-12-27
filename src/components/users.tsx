@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
 import { getUsers } from "../api/user";
-import type { User } from "../context/AuthContext";
-import { 
-  Table, TableBody, TableContainer, TableHead, TableRow, 
-  Typography, Container, Stack, Avatar, Box, Skeleton 
+import { useAuth, type User } from "../context/AuthContext";
+import {
+  Table, TableBody, TableContainer, TableHead, TableRow,
+  Typography, Container, Stack, Avatar, Box, Skeleton
 } from "@mui/material";
 import * as S from "../styles/UsersList.styles";
 
 const UsersList = () => {
   const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { setError } = useAuth();
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -17,15 +18,16 @@ const UsersList = () => {
         const data = await getUsers();
         setUsers(data);
       } catch (err) {
-        console.error("Failed to fetch users");
+        setError(err);
       } finally {
-        setLoading(false);
+       
+        setIsInitialLoading(false);
       }
     };
     fetchUsers();
   }, []);
 
-  if (loading) return (
+  if (isInitialLoading) return (
     <S.PageContainer>
       <Container maxWidth="lg">
         <Skeleton variant="text" width={200} height={60} sx={{ mb: 4 }} />

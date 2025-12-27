@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Typography, Box, CircularProgress, MenuItem, Stack } from "@mui/material";
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import * as S from "../styles/Auth.styles"; 
+import { useAuth } from "../context/AuthContext";
 
 interface NewTicketForm {
   subject: string;
@@ -14,6 +15,7 @@ interface NewTicketForm {
 }
 
 const NewTicket = () => {
+  const { setError, setLoading } = useAuth();
   const navigate = useNavigate();
   const [priorities, setPriorities] = useState<Priority[]>([]);
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<NewTicketForm>({
@@ -25,7 +27,8 @@ const NewTicket = () => {
       try {
         const data = await getPriorities();
         setPriorities(data);
-      } catch (err) { console.error(err); }
+      } catch (err) { setError(err); }
+      finally { setLoading(false); }
     };
     fetchPriorities();
   }, []);
@@ -34,7 +37,11 @@ const NewTicket = () => {
     try {
       await createTicket({ ...data, priority_id: Number(data.priority_id) });
       navigate("/tickets");
-    } catch (err) { alert("שגיאה ביצירת הפניה"); }
+    } catch (err) {
+      alert("שגיאה ביצירת הפניה");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

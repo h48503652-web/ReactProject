@@ -10,7 +10,7 @@ interface LoginForm { email: string; password: string; }
 
 const Login = () => {
   const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>();
-  const { login, user, loading } = useAuth();
+  const { login, user, loading ,setError, setLoading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,9 +22,14 @@ const Login = () => {
       const { token, user: userData } = await loginRequest(data.email, data.password);
       login(userData, token);
       navigate("/dashboard");
-    } catch (err: any) {
-      alert(err.response?.data?.message || "פרטי התחברות שגויים");
+    } catch (err) {
+
+      setError(err);
     }
+    finally {
+      setLoading(false);
+    }
+      
   };
 
   if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', mt: 10 }}><CircularProgress /></Box>;

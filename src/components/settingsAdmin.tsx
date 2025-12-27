@@ -9,12 +9,14 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import ListIcon from '@mui/icons-material/List';
 import * as S from "../styles/AdminSettings.styles";
+import { useAuth } from '../context/AuthContext';
 
 const AdminSettings = () => {
   const [newName, setNewName] = useState("");
   const [type, setType] = useState("status");
   const [list, setList] = useState<Status[]>([]);
   const [loading, setLoading] = useState(false);
+  const { setError } = useAuth();
 
   const refreshData = async () => {
     setLoading(true);
@@ -22,7 +24,7 @@ const AdminSettings = () => {
       const data = type === "status" ? await getStatuses() : await getPriorities();
       setList(data);
     } catch (err) {
-      console.error("טעינה נכשלה", err);
+      setError(err);
     } finally {
       setLoading(false);
     }
@@ -45,7 +47,8 @@ const AdminSettings = () => {
       setNewName("");
       refreshData();
     } catch (err) {
-      alert("שגיאה ביצירה. ייתכן והשם כבר קיים.");
+      setError(err);
+     
     }
   };
 

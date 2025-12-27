@@ -12,13 +12,27 @@ import GetUsers from "./components/users";
 import CreateUser from "./components/createUser";
 import AdminSettings from "./components/settingsAdmin";
 import Footer from "./components/footer";
+import ErrorMessage from "./components/ErrorMessage";
+import { useAuth } from "./context/AuthContext";
+import { Backdrop, CircularProgress } from "@mui/material";
 
 
 function App() {
+  const { error, clearError, loading } = useAuth();
   return (
     <>
       <Header />
+     {/* הצגת הודעת השגיאה במידה וקיימת */}
+        {error && (
+          <ErrorMessage 
+            message={error} 
+            onClose={clearError} // לחיצה על X תפעיל את ה-Dispatch לניקוי
+          />
+        )}
 
+        <Backdrop open={loading}>
+       <CircularProgress color="inherit" />
+    </Backdrop>
 
       <Routes>
 

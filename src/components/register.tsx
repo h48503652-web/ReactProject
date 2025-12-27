@@ -11,7 +11,7 @@ export interface RegisterForm { name: string; email: string; password: string; }
 const Register = () => {
   const { register, handleSubmit, formState: { errors } } = useForm<RegisterForm>();
   const navigate = useNavigate();
-  const { login, user, loading } = useAuth();
+  const { login, user, loading, setError, setLoading } = useAuth();
 
   useEffect(() => {
     if (!loading && user) navigate("/dashboard");
@@ -32,9 +32,11 @@ const onSubmit = async (data: RegisterForm) => {
       navigate("/login");
     }
 
-  } catch (err: any) {
-    console.error("Registration error:", err);
-    alert(err.response?.data?.message || "שגיאה בתהליך הרישום");
+  } catch (err) {
+    setError(err);
+  }
+  finally {
+    setLoading(false);  
   }
 };
 
